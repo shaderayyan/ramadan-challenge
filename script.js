@@ -31,46 +31,119 @@ const challenges = [
     { day: 30, title: "يوم الجائزة", task: "صلة الرحم والتحضير لصلاة العيد + معلومة: فلسطين ستبقى في القلوب دائماً وأبداً." }
 ];
 
+
+// 2. إدارة بيانات المستخدم
+let userData = JSON.parse(localStorage.getItem('ramadan_user')) || null;
+
+// 3. دالة تسجيل المستخدم
+window.registerUser = function() {
+    const nameInput = document.getElementById('username-input');
+    const name = nameInput.value.trim();
+    
+    if (name.length < 3) {
+        alert("الرجاء إدخال اسم حقيقي (3 حروف على الأقل)");
+        return;
+    }
+    
+    userData = {
+        name: name,
+        points: 0,
+        completedDays: []
+    };
+    
+    localStorage.setItem('ramadan_user', JSON.stringify(userData));
+    initApp();
+};
+
+// 4. دالة إنشاء المربعات (Grid)
 function initGrid() {
     const grid = document.getElementById('grid');
     if (!grid) return;
     grid.innerHTML = '';
+
     for (let i = 1; i <= 30; i++) {
         const card = document.createElement('div');
         card.className = 'day-card';
-        if (localStorage.getItem(`day_${i}`)) card.classList.add('completed');
-        card.innerHTML = `<span>${i}</span>`;
+        
+        // فحص الأيام المكتملة
+        if (userData && userData.completedDays.includes(i)) {
+            card.classList.add('completed');
+            card.innerHTML = `<span>${i}</span><small>✅</small>`;
+        } else {
+            card.innerHTML = `<span>${i}</span>`;
+        }
+
         card.onclick = () => openModal(i);
         grid.appendChild(card);
     }
 }
 
-function openModal(day) {
+// 5. فتح وإغلاق المودال
+window.openModal = function(day) {
+    if (!userData) {
+        alert("الرجاء تسجيل اسمك أولاً للدخول في التحدي!");
+        return;
+    }
     window.currentDay = day;
-    const challenge = challenges.find(c => c.day === day) || { title: `اليوم ${day}`, task: "تحدي قادم!" };
-    document.getElementById('modal-title').innerText = challenge.title;
-    document.getElementById('modal-content').innerText = challenge.task;
+    const ch = challenges.find(c => c.day === day) || { title: `اليوم ${day}`, task: "تحدي قادم!" };
+    document.getElementById('modal-title').innerText = ch.title;
+    document.getElementById('modal-content').innerText = ch.task;
     document.getElementById('overlay').style.display = 'block';
-}
+};
 
-function toggleModal(show) {
+window.toggleModal = function(show) {
     document.getElementById('overlay').style.display = show ? 'block' : 'none';
+};
+
+// 6. تسجيل إتمام المهمة
+window.markAsDone = function() {
+    if (!userData.completedDays.includes(window.currentDay)) {
+        userData.points += 10;
+        userData.completedDays.push(window.currentDay);
+        localStorage.setItem('ramadan_user', JSON.stringify(userData));
+    }
+    toggleModal(false);
+    initApp();
+};
+
+// 7. تحديث لوحة الصدارة (محاكاة عالمية)
+function updateLeaderboard() {
+    const list = document.getElementById('leaderboard-list');
+    if (!list) return;
+
+    const players = [
+        {name: "ياسين (ألمانيا)", points: 50},
+        {name: "مريم (كندا)", points: 40},
+        {name: "خالد (غزة)", points: 30}
+    ];
+
+    if (userData) {
+        players.push({name: userData.name + " (أنت)", points: userData.points});
+    }
+
+    players.sort((a, b) => b.points - a.points);
+
+    list.innerHTML = players.map((p, i) => `
+        <li style="${p.name.includes('(أنت)') ? 'background:#fff9e6; font-weight:bold' : ''}">
+            <span>${i+1}. ${p.name}</span>
+            <b>${p.points} 🌟</b>
+        </li>
+    `).join('');
 }
 
-function markAsDone() {
-    localStorage.setItem(`day_${window.currentDay}`, 'true');
-    toggleModal(false);
-    initGrid();
-let currentPoints = parseInt(localStorage.getItem('user_points') || '0');
-localStorage.setItem('user_points', currentPoints + 10);
-updateScore();}
-function updateScore() {
-    const scoreElement = document.getElementById('points-count');
-    if(scoreElement) {
-        scoreElement.innerText = localStorage.getItem('user_points') || '0';
+// 8. تشغيل التطبيق
+function initApp() {
+    if (userData) {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('user-display').innerHTML = `
+            <span>${userData.name}</span> | <b>${userData.points} نقطة 🌟</b>
+        `;
+        initGrid();
+        updateLeaderboard();
+    } else {
+        document.getElementById('auth-section').style.display = 'block';
     }
 }
-// استدعي updateScore() في نهاية ملف الـ JS
-updateScore();
+
 // البدء عند تحميل الصفحة
-initGrid();
+window.onload = initApp;
