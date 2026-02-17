@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-
-  <head>
-    <meta charset="UTF-8">
-    <title>RAMADAM</title>
-    <link rel="stylesheet" href="./style.css">
-
-  </head>
-    
-  <body>
-  <header>
+<header><script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <div class="logo">🌙 فوانيس</div>
     <h1>تحدي 30 يوم رمضان</h1>
     <p>أنقذ تقاليدنا وأتمم عباداتك</p>
@@ -27,8 +17,37 @@
         <button class="done-btn" onclick="markAsDone()">لقد أتممت المهمة! 🌿</button>
     </div>
 </div>
-    <script  src="./script.js"></script>
+<div id="app">
+    <header>
+        <div class="logo">🌙 فوانيس 2026</div>
+        <h1>تحدي 30 يوم رمضان</h1>
+        <div class="user-info" id="user-display">
+            </div>
+    </header>
 
-  </body>
-  
-</html>
+    <div id="auth-section" class="auth-card">
+        <h3>سجل اسمك لتدخل المنافسة العالمية</h3>
+        <input type="text" id="username-input" placeholder="ادخل اسمك هنا...">
+        <button onclick="registerUser()">ابدأ التحدي 🚀</button>
+    </div>
+
+    <main class="main-content">
+        <div class="grid-container" id="grid"></div>
+        
+        <aside class="leaderboard">
+            <h3>🏆 المتصدرين عالمياً</h3>
+            <ul id="leaderboard-list">
+                <li>جاري التحميل...</li>
+            </ul>
+        </aside>
+    </main>
+
+    <div class="overlay" id="overlay">
+        <div class="modal">
+            <h2 id="modal-title"></h2>
+            <p id="modal-content"></p>
+            <button class="done-btn" onclick="markAsDone()">تم الإنجاز +10 نقاط 🌟</button>
+            <button onclick="toggleModal(false)">إغلاق</button>
+        </div>
+    </div>
+</div>
